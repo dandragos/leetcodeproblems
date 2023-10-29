@@ -1,0 +1,66 @@
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+class Solution {
+    vector<vector<int>> graf, rezultat;
+    vector<int> iduri, scazut;
+    int id;
+
+    void dfs(int nod, int părinte) {
+        iduri[nod] = scazut[nod] = id++;
+        for (int vecin : graf[nod]) {
+            if (iduri[vecin] == -1) {
+                dfs(vecin, nod);
+                scazut[nod] = min(scazut[nod], scazut[vecin]);
+                if (scazut[vecin] > iduri[nod]) {
+                    rezultat.push_back({nod, vecin});
+                }
+            } else if (vecin != părinte) {
+                scazut[nod] = min(scazut[nod], iduri[vecin]);
+            }
+        }
+    }
+
+public:
+    vector<vector<int>> criticalConnections(int n, vector<vector<int>>& conexiuni) {
+        id = 0;
+        graf.resize(n);
+        iduri.resize(n, -1);
+        scazut.resize(n, -1);
+
+        for (auto& conn : conexiuni) {
+            graf[conn[0]].push_back(conn[1]);
+            graf[conn[1]].push_back(conn[0]);
+        }
+
+        for (int i = 0; i < n; ++i) {
+            if (iduri[i] == -1) {
+                dfs(i, -1);
+            }
+        }
+        return rezultat;
+    }
+};
+
+// Funcția DFS primește un nod și părintele său și efectuează o căutare în adâncime în graf.
+// Atribuie id-ul curent nodului și valoarea scăzută.
+// Vizitează recursiv vecinii nodului și actualizează valoarea scăzută corespunzător.
+// Dacă valoarea scăzută a vecinului este mai mare decât id-ul nodului curent, înseamnă că muchia este o conexiune critică și este adăugată la rezultat.
+// Dacă vecinul nu este părintele, valoarea scăzută a nodului curent este actualizată pe baza id-ului vecinului.
+
+// Funcție de conexiuni critice (criticalConnections):
+
+// Inițializează variabilele și vectorii necesari.
+// Construiește graful pe baza conexiunilor date.
+// Începe DFS pentru fiecare nod nevizitat.
+// Returnează rezultatul care conține conexiunile critice.
+
+// Funcție principală (main):
+
+// Creează o instanță a clasei Soluție.
+// Definește conexiunile de intrare pentru cele două exemple furnizate.
+// Apelează funcția criticalConnections pentru ambele exemple.
+// Afișează rezultatele.
+// Algoritmul lui Tarjan este un algoritm popular pentru găsirea punților (sau conexiunilor critice) într-un graf. Prin efectuarea unei căutări în adâncime și urmărirea anumitor valori, identifică muchiile care, dacă sunt eliminate, vor deconecta graficul sau anumite noduri de restul graficului. Acest algoritm este eficient și este utilizat pe scară largă pentru rezolvarea problemelor similare.
