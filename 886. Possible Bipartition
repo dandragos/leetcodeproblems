@@ -1,0 +1,78 @@
+#include <vector>
+
+class Solution {
+public:
+    // Funcția pentru a verifica dacă este posibil să se divizeze grupul în două în funcție de antipatii
+    bool possibleBipartition(int n, std::vector<std::vector<int>>& dislikes) {
+        // Creăm un graf cu n+1 rânduri și coloane goale
+        std::vector<std::vector<int>> graph(n + 1, std::vector<int>());
+        // Creăm un vector pentru a ține evidența culorilor atribuite fiecărei persoane
+        std::vector<int> colors(n + 1, 0);
+
+        // Populăm graficul în funcție de antipatii
+        for (const auto& dislike : dislikes) {
+            // Adăugăm fiecare persoană în lista de antipatii a celeilalte persoane
+            graph[dislike[0]].push_back(dislike[1]);
+            graph[dislike[1]].push_back(dislike[0]);
+        }
+
+        // Parcurgem fiecare persoană
+        for (int i = 1; i <= n; ++i) {
+            // Dacă persoana curentă nu a primit încă o culoare și există un conflict în atribuirea culorilor, returnăm fals
+            if (colors[i] == 0 && !dfs(i, 1, colors, graph)) {
+                return false;
+            }
+        }
+
+        // Dacă parcurgerea se termină fără conflicte, returnăm adevărat
+        return true;
+    }
+
+    // Funcția de căutare în adâncime pentru a atribui culori și a verifica conflictele
+    bool dfs(int person, int color, std::vector<int>& colors, std::vector<std::vector<int>>& graph) {
+        // Dacă persoana are deja o culoare atribuită, verificăm conflictele
+        if (colors[person] != 0) {
+            // Dacă culoarea atribuită nu este aceeași cu cea pe care încercăm să o atribuim, este un conflict
+            return colors[person] == color;
+        }
+
+        // Atribuim culoarea curentă persoanei
+        colors[person] = color;
+
+        // Parcurgem vecinii persoanei curente
+        for (int neighbor : graph[person]) {
+            // Apelăm recursiv dfs pentru fiecare vecin cu culoarea opusă
+            if (!dfs(neighbor, -color, colors, graph)) {
+                // Dacă se găsește un conflict în timpul apelului recursiv, returnăm fals
+                return false;
+            }
+        }
+
+        // Dacă nu se găsește niciun conflict în timpul parcurgerii, returnăm adevărat
+        return true;
+    }
+};
+
+// Construirea Graficului:
+
+// Cream un vector bidimensional "graph" cu n+1 randuri si coloane goale. Acest vector serveste ca o lista de adiacenta pentru a reprezenta graficul. Fiecare rand i reprezinta persoanele pe care persoana i nu le agreeaza.
+// Initializam un vector "colors" de dimensiune n+1 pentru a tine evidenta culorilor atribuite fiecarei persoane. Aici, 0 reprezinta lipsa unei culori, 1 si -1 reprezinta cele doua grupuri diferite.
+
+// Popularea Graficului:
+
+// Iteram prin vectorul "dislikes", care contine perechi de persoane care nu se plac reciproc. Pentru fiecare pereche, adaugam persoanele corespunzatoare in lista de persoane pe care nu le agreaza in grafic.
+
+// Cautare in Adancime (DFS):
+
+// Functia "dfs" primeste persoana curenta, culoarea ce trebuie atribuita, vectorul "colors" si graficul.
+// Daca persoana curenta are deja o culoare atribuita (adica "colors[person] != 0"), verificam daca culoarea atribuita este aceeasi cu cea pe care incercam sa o atribuim. Daca nu, inseamna ca exista un conflict si returnam fals.
+// Daca persoana curenta nu are inca o culoare atribuita, ii atribuim culoarea curenta si apelam recursiv functia "dfs" pe vecinii sai cu culoarea opusa.
+// Daca intalnim vreun conflict in timpul parcurgerii recursive DFS, returnam fals.
+
+// Returnarea Rezultatului:
+
+// In functia "possibleBipartition", parcurgem fiecare persoana si, daca vreuna dintre ele nu a primit inca o culoare, pornim o cautare DFS de la acea persoana cu o culoare initiala de 1. Daca la un moment dat DFS returneaza fals, returnam imediat fals si din functia "possibleBipartition", indicand ca nu este posibila impartirea tuturor persoanelor in doua grupuri.
+// Daca parcurgerea DFS se incheie fara niciun conflict, returnam true.
+
+// Algoritmul incearca in esenta sa atribuie una dintre cele doua culori fiecarei persoane si vecinilor sai, asigurandu-se ca nicio doua persoane conectate nu au aceeasi culoare. Daca este posibil sa faca acest lucru, functia returneaza true; in caz contrar, returneaza false.
+
