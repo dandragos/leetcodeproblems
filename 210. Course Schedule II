@@ -1,0 +1,83 @@
+#include <vector>
+#include <unordered_map>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+        // Inițializăm o listă de adiacență și vectorul de stare a nodurilor
+        vector<vector<int>> adj(numCourses, vector<int>());
+        vector<int> visited(numCourses, 0);
+        vector<int> result;
+        unordered_map<int, bool> memo;
+
+        // Construim lista de adiacență
+        for (const auto& p : prerequisites) {
+            adj[p[1]].push_back(p[0]);
+        }
+
+        // Efectuăm parcurgerea în adâncime (DFS) pentru fiecare nod
+        for (int i = 0; i < numCourses; ++i) {
+            if (visited[i] == 0 && !dfs(i, adj, visited, result, memo)) {
+                return {};
+            }
+        }
+
+        // Inversăm vectorul rezultat pentru a obține ordinea topologică corectă
+        reverse(result.begin(), result.end());
+        return result;
+    }
+
+    // Funcție pentru parcurgerea în adâncime
+    bool dfs(int node, vector<vector<int>>& adj, vector<int>& visited, vector<int>& result, unordered_map<int, bool>& memo) {
+        // Verificăm dacă nodul este în curs de vizitare
+        if (visited[node] == 1) {
+            return false;
+        }
+        // Verificăm dacă nodul a fost deja vizitat
+        if (visited[node] == 2) {
+            return true;
+        }
+
+        // Marchez nodul ca fiind în vizitare
+        visited[node] = 1;
+
+        // Parcurgem recursiv vecinii nodului curent
+        for (int neighbor : adj[node]) {
+            if (!dfs(neighbor, adj, visited, result, memo)) {
+                return false;
+            }
+        }
+
+        // Marchez nodul ca fiind vizitat
+        visited[node] = 2;
+        // Adaug nodul în vectorul rezultat
+        result.push_back(node);
+
+        return true;
+    }
+};
+
+
+// Funcția findOrder primește ca parametri numărul de cursuri numCourses și un vector de perechi de precondiții prerequisites și returnează un vector care reprezintă ordinea cursurilor de urmat.
+
+// Funcția inițializează mai întâi lista de adiacență adj, un vector visited pentru a urmări nodurile vizitate și un vector result pentru a stoca ordinea topologică.
+
+// Codul construiește lista de adiacență adj pe baza perechilor de precondiții furnizate.
+
+// Funcția dfs efectuează o căutare în adâncime pe fiecare nod. Primește ca parametri nodul curent, lista de adiacență, matricea vizitată, vectorul rezultat și o hartă de memorare unordered map.
+
+// În interiorul funcției dfs, se verifică dacă nodul curent este în curs de vizitare. Dacă este în curs de vizitare, acest lucru implică prezența unui ciclu, deci funcția returnează fals.
+
+// Dacă nodul curent a fost deja vizitat și procesat, funcția returnează true.
+
+// Dacă nodul curent nu este nici în curs de vizitare, nici vizitat, marchează nodul ca fiind în vizitare și apelează recursiv funcția dfs pentru toți vecinii nodului curent.
+
+// Dacă oricare dintre apelurile recursive returnează fals, indicând prezența unui ciclu, funcția returnează fals.
+
+// Dacă nu se detectează niciun ciclu, nodul curent este marcat ca vizitat și este introdus în vectorul rezultat.
+
+// După ce procesul DFS este finalizat pentru toate nodurile, vectorul rezultat este inversat pentru a obține ordinea topologică corectă.
+
+// Soluția utilizează în principal DFS pentru a parcurge graful de cursuri și a detecta orice cicluri. Dacă nu se găsește niciun ciclu, se construiește ordinea topologică a cursurilor. Dacă se detectează un ciclu, funcția returnează un vector gol, indicând că nu este posibil să se finalizeze toate cursurile.
